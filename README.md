@@ -34,3 +34,9 @@ Official logo preserved unmodified from https://farinroshaan.com/wp-content/uplo
 `npm test` runs data consistency tests with Node's built-in test runner. No installation required.
 
 Chromium testing covered `/Farin-bi/` asset/font loading, all five routes, period/service filters, customer search including no results, dialogs and Escape/focus restoration, downloaded CSV contents, disabled-JavaScript fallback and no document overflow at 1440×1000, 768×1024, 390×844 and 320×700. Desktop and iPhone screenshots were inspected. Tables intentionally scroll inside their own containers. Production integrations require a separate authenticated backend and are not implemented in this prototype.
+
+## Payam Gostar backend API
+
+A separate, protected read API is now implemented in `server/`. It uses the company's documented SOAP service shapes for organizations, sale invoices and opportunities. See [Persian setup and API documentation](docs/payamgostar-api.md) and `.env.example`. Run `npm ci --ignore-scripts`, configure server-only environment variables and start with `npm run start:api`. Node.js 22.9+ is required. The single XML parsing dependency belongs to the backend; GitHub Pages needs no build step.
+
+**The backend is not deployed or connected to real CRM data.** GitHub Pages continues to show the tested fictional demo. The API currently supports trusted server clients via a private bearer token; browser user login must be implemented before connecting the public dashboard to private data. Never copy the backend token into frontend assets. No credentials have been added to this repository. `npm test` now includes backend security, SOAP, normalization and HTTP tests using fictional fixtures.

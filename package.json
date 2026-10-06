@@ -1,1 +1,15 @@
-{"name":"farin-bi","private":true,"type":"module","scripts":{"test":"node --test tests/metrics.test.js"}}
+{
+  "name": "farin-bi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/metrics.test.js tests/server/*.test.js",
+    "start:api": "node --env-file-if-exists=.env server/index.js"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.11.2"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  }
+}
