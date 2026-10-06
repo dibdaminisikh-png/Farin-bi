@@ -1,0 +1,71 @@
+// Blueprint: create each measure separately in the documented star model.
+// Outcome values: active / won / lost / unknown. Timestamps must be UTC DateTime.
+Current Cases = COALESCE(DISTINCTCOUNT(FactCase[CaseId]), 0)
+
+Active Cases =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[Outcome] = "active"))
+
+Successful Cases =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[Outcome] = "won"))
+
+Unsuccessful Cases =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[Outcome] = "lost"))
+
+Waiting Cases =
+CALCULATE([Active Cases], KEEPFILTERS(DimNode[Kind] = "wait"))
+
+Known Current Duration Cases =
+COUNTROWS(FILTER(FactCase,
+    FactCase[Outcome] = "active" && NOT ISBLANK(FactCase[CurrentEnteredAtUtc])))
+
+Average Current Basket Days =
+VAR AsOfUtc = SELECTEDVALUE(Snapshot[AsOfUtc])
+RETURN IF(ISBLANK(AsOfUtc), BLANK(),
+    AVERAGEX(FILTER(FactCase,
+        FactCase[Outcome] = "active" && NOT ISBLANK(FactCase[CurrentEnteredAtUtc])),
+        MAX(0, AsOfUtc - FactCase[CurrentEnteredAtUtc])))
+
+// SampleTargetDays is DEMO ONLY. Use an approved SLA column before live reporting.
+Over Sample Target Cases =
+VAR AsOfUtc = SELECTEDVALUE(Snapshot[AsOfUtc])
+RETURN IF(ISBLANK(AsOfUtc), BLANK(), COUNTROWS(FILTER(FactCase,
+    FactCase[Outcome] = "active"
+    && NOT ISBLANK(FactCase[CurrentEnteredAtUtc])
+    && NOT ISBLANK(FactCase[SampleTargetDays])
+    && AsOfUtc - FactCase[CurrentEnteredAtUtc] > FactCase[SampleTargetDays])))
+
+Complete History Cases =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[HistoryComplete] = TRUE()))
+
+History Coverage = DIVIDE([Complete History Cases], [Current Cases])
+
+// Do not interpret unknown history as zero: aggregate stays blank unless complete.
+Return Events =
+IF([Current Cases] > 0 && [Complete History Cases] = [Current Cases],
+    SUM(FactCase[ReturnCount]), BLANK())
+
+Cases With Rework (Known History) =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[HistoryComplete] = TRUE()),
+    KEEPFILTERS(FactCase[ReturnCount] > 0))
+
+Prepayment Waiting Days =
+IF([Current Cases] > 0 && [Complete History Cases] = [Current Cases],
+    SUM(FactCase[PrepaymentWaitDays]), BLANK())
+
+Settlement Waiting Days =
+IF([Current Cases] > 0 && [Complete History Cases] = [Current Cases],
+    SUM(FactCase[SettlementWaitDays]), BLANK())
+
+Eligible Second Test Cases =
+CALCULATE([Current Cases], KEEPFILTERS(FactCase[NeedsSecondTest] = TRUE()))
+
+Completed Eligible Second Test Cases =
+CALCULATE([Eligible Second Test Cases], KEEPFILTERS(FactCase[CompletedTest2] = TRUE()))
+
+// Completion coverage, NOT a pass/fail quality rate. Unknown and "no" excluded.
+Second Test Completion Coverage =
+DIVIDE([Completed Eligible Second Test Cases], [Eligible Second Test Cases])
+
+Visits = COUNTROWS(FactVisit)
+
+Distinct Visited Cases = DISTINCTCOUNT(FactVisit[CaseId])

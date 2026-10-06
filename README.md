@@ -40,3 +40,9 @@ Chromium testing covered `/Farin-bi/` asset/font loading, all five routes, perio
 A separate, protected read API is now implemented in `server/`. It uses the company's documented SOAP service shapes for organizations, sale invoices and opportunities. See [Persian setup and API documentation](docs/payamgostar-api.md) and `.env.example`. Run `npm ci --ignore-scripts`, configure server-only environment variables and start with `npm run start:api`. Node.js 22.9+ is required. The single XML parsing dependency belongs to the backend; GitHub Pages needs no build step.
 
 **The backend is not deployed or connected to real CRM data.** GitHub Pages continues to show the tested fictional demo. The API currently supports trusted server clients via a private bearer token; browser user login must be implemented before connecting the public dashboard to private data. Never copy the backend token into frontend assets. No credentials have been added to this repository. `npm test` now includes backend security, SOAP, normalization and HTTP tests using fictional fixtures.
+
+## فرآیند فرصت طراحی
+
+نمای اصلی `#processes`، مرحله کلی و کارتابل فعلی را جدا نشان می‌دهد. ساختار از توضیح ارسالی فرآیند پیام‌گستر گرفته شده و ۲۲ پرونده کاملاً آزمایشی دارد. انتظارهای مالی، بازگشت‌های اصلاحی، تست دوم اختیاری و نتیجه موفق/ناموفق مستقل‌اند. جست‌وجو، فیلتر مرحله/کارتابل/خدمت/مسئول، جزئیات timeline و CSV روی یک انتخاب مشترک کار می‌کنند.
+
+تعریف فرآیند در `assets/process-definition.js`، داده فرضی در `assets/process-demo.js`، منطق در `assets/process-model.js` و UI در `assets/process-workspace.js` جداست. برای مدل Power BI، قرارداد تاریخچه و محدودیت‌های اتصال، [راهنمای فرصت طراحی](docs/design-opportunity.md) و [الگوی DAX](powerbi/measures.dax) را ببینید. گزارش native یا اتصال زنده هنوز ساخته نشده است.
